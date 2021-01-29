@@ -2,10 +2,11 @@ package com.kaan.finartz.airportticket.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -18,17 +19,14 @@ public abstract class BaseEntity {
     private Long id;
 
     @Column(name = "CREATED_DATE", updatable = false)
-    @UpdateTimestamp
-    private Date createdDate;
+    @CreationTimestamp
+    private Timestamp createdDate;
 
     @Column(name = "UPDATED_DATE")
     @UpdateTimestamp
-    private Date updatedDate;
+    private Timestamp updatedDate;
 
     @Version
     @Column(name = "VERSION")
     private Integer version;
-
-    @Column(name = "DELETED")
-    private Boolean deleted;
 }

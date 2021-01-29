@@ -2,7 +2,6 @@ package com.kaan.finartz.airportticket.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -11,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Where(clause = "DELETED = 0")
 @Entity(name = "Airline")
 @Table(name = "AIRLINE")
 public class Airline extends BaseEntity{

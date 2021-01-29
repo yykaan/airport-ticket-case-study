@@ -2,15 +2,13 @@ package com.kaan.finartz.airportticket.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
-@Where(clause = "DELETED = 0")
 @Entity(name = "FlightRoute")
 @Table(name = "FLIGHT_ROUTE")
 public class FlightRoute extends BaseEntity{
@@ -33,11 +31,11 @@ public class FlightRoute extends BaseEntity{
 
     @NotNull
     @Column(name = "DEPLOYMENT_DATE")
-    private Date deploymentDate;
+    private Timestamp deploymentDate;
 
     @NotNull
     @Column(name = "ARRIVAL_DATE")
-    private Date arrivalDate;
+    private Timestamp arrivalDate;
 
     @Column(name = "ESTIMATED_FLIGHT_TIME")
     private Double estimatedFlightTime;
