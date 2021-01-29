@@ -9,8 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.Set;
 
 @Getter
@@ -19,6 +17,7 @@ import java.util.Set;
 @Entity(name = "Customer")
 @Table(name = "CUSTOMER")
 public class Customer extends BaseEntity{
+    public static final long serialVersionUID = -3925522215522640791L;
 
     @NotBlank
     @Column(name = "NAME")
