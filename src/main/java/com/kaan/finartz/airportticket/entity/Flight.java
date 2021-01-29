@@ -32,19 +32,26 @@ public class Flight extends BaseEntity{
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<FlightTicket> flightTicketList = new ArrayList<>();
+    private List<FlightTicket> flightTicketList;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Airline airline;
 
-    private void addFlightTicket(FlightTicket flightTicket){
+    public void addFlightTicket(FlightTicket flightTicket){
+        if (flightTicketList.isEmpty()){
+            flightTicketList = new ArrayList<>();
+        }
         flightTicketList.add(flightTicket);
         flightTicket.setFlight(this);
     }
 
-    private void removeFlightTicket(FlightTicket flightTicket){
-        flightTicketList.remove(flightTicket);
-        flightTicket.setFlight(null);
+    public void removeFlightTicket(FlightTicket flightTicket){
+        if (flightTicketList.isEmpty()){
+            flightTicketList = new ArrayList<>();
+        }else {
+            flightTicketList.remove(flightTicket);
+            flightTicket.setFlight(null);
+        }
     }
 
 }

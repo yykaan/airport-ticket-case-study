@@ -30,16 +30,23 @@ public class Airline extends BaseEntity{
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<Flight> flightList = new ArrayList<>();
+    private List<Flight> flightList;
 
-    private void addFlight(Flight flight){
+    public void addFlight(Flight flight){
+        if(flightList.isEmpty()){
+            flightList = new ArrayList<>();
+        }
         flightList.add(flight);
         flight.setAirline(this);
     }
 
-    private void removeFlight(Flight flight){
-        flightList.remove(flight);
-        flight.setAirline(null);
+    public void removeFlight(Flight flight){
+        if(flightList.isEmpty()){
+            flightList = new ArrayList<>();
+        }else {
+            flightList.remove(flight);
+            flight.setAirline(null);
+        }
     }
 
 }
