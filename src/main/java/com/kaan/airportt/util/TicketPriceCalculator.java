@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 public class TicketPriceCalculator {
     private static TicketPriceCalculator ticketPriceCalculator = null;
+    private static BigDecimal lastSoldTicketPrice;
 
     protected TicketPriceCalculator() {
     }
@@ -24,18 +25,24 @@ public class TicketPriceCalculator {
         return ticketPriceCalculator;
     }
 
-    public BigDecimal calculateTicketPrice(Flight flight, FlightTicket flightTicket){
+    public BigDecimal calculateTicketPrice(Flight flight, FlightTicket flightTicket, Integer purchasedTicketCount){
         if (flight.getFlightTickets() != null && !flight.getFlightTickets().isEmpty()){
             BigDecimal baseTicketPrice = flightTicket.getPrice();
 
+            if (lastSoldTicketPrice == null){
+                lastSoldTicketPrice = baseTicketPrice;
+            }
+
             Integer capacity = flight.getPassengerCapacity();
 
-            Integer priceUpCapacity = capacity * (1 / 10);
+            int priceUpCapacity = capacity / 10;
 
-
+            if ((purchasedTicketCount) % priceUpCapacity == 0 && purchasedTicketCount > 0){
+                lastSoldTicketPrice = lastSoldTicketPrice.divide(BigDecimal.valueOf(10.0)).add(lastSoldTicketPrice);
+            }
         }
 
-        return BigDecimal.ZERO;
+        return lastSoldTicketPrice;
     }
 
 }

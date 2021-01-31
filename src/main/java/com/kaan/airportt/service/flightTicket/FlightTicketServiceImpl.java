@@ -93,10 +93,12 @@ public class FlightTicketServiceImpl implements FlightTicketService {
     @Override
     public boolean isPurchased(Long ticketId) {
         FlightTicket flightTicket = repository.findByIdAndPurchasedTrue(ticketId);
-        if (flightTicket == null){
-            return false;
-        }else {
-            return true;
-        }
+        return flightTicket != null;
+    }
+
+    @Override
+    public Integer getPurchasedTicketCount(Flight flight) {
+        Long purchasedTicketCount = repository.countByFlightAndPurchasedTrue(flight);
+        return Math.toIntExact(purchasedTicketCount);
     }
 }

@@ -10,4 +10,6 @@ public interface FlightTicketService extends CommonService<FlightTicket> {
     List<FlightTicket> findByFlight(Flight flight);
 
     boolean isPurchased(Long ticketId);
+
+    Integer getPurchasedTicketCount(Flight flight);
 }

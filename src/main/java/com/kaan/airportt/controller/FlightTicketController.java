@@ -10,13 +10,15 @@ import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.mapper.FlightTicketMapper;
 import com.kaan.airportt.service.flight.FlightService;
 import com.kaan.airportt.service.flightTicket.FlightTicketService;
-import com.kaan.airportt.util.CreditCardMask;
+import com.kaan.airportt.util.CreditCardMaskUtil;
+import com.kaan.airportt.util.TicketPriceCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,7 +58,19 @@ public class FlightTicketController extends AbstractController {
             if (flightTicketOptional.isPresent()) {
                 FlightTicket flightTicket = flightTicketOptional.get();
                 flightTicket.setPurchased(true);
-                purchasedTicket = flightTicketService.saveAndUpdate(flightTicket);
+                /**
+                 * Fiyat hesaplaması yap
+                 * Her %10 kontenjan artışında fiyat %10 artacak
+                 * */
+                Integer purchasedTicketCount = flightTicketService.getPurchasedTicketCount(flightTicket.getFlight());
+                Optional<Flight> flightOptional = flightService.findById(flightTicket.getFlight().getId());
+                if (flightOptional.isPresent()){
+                    BigDecimal ticketPrice = TicketPriceCalculator.getInstance().calculateTicketPrice(flightOptional.get(), flightTicket, purchasedTicketCount);
+                    flightTicket.setPrice(ticketPrice);
+
+                    purchasedTicket = flightTicketService.saveAndUpdate(flightTicket);
+                }
+
             }
             if (purchasedTicket != null) {
                 FlightTicketPostPurchaseDto flightTicketPostPurchaseDto = new FlightTicketPostPurchaseDto();
@@ -64,8 +78,8 @@ public class FlightTicketController extends AbstractController {
                 purchasedTicket.getFlight().setFlightTickets(null);
                 flightTicketPostPurchaseDto.setFlight(flightMapper.toDto(purchasedTicket.getFlight()));
                 flightTicketPostPurchaseDto.setTicketNo(purchasedTicket.getTicketNo());
-                flightTicketPostPurchaseDto.setPrice(purchasedTicket.getPrice());//fiyat hesaplaması yapılacak
-                flightTicketPostPurchaseDto.setCreditCardNumber(CreditCardMask.maskCreditCardNumber(flightTicketPurchaseDto.getCreditCardNumber()));
+                flightTicketPostPurchaseDto.setPrice(purchasedTicket.getPrice());
+                flightTicketPostPurchaseDto.setCreditCardNumber(CreditCardMaskUtil.maskCreditCardNumber(flightTicketPurchaseDto.getCreditCardNumber()));
 
                 return new ResponseEntity<>(flightTicketPostPurchaseDto, HttpStatus.OK);
             }

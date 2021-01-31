@@ -11,4 +11,6 @@ public interface FlightTicketRepository extends CommonRepository<FlightTicket> {
     List<FlightTicket> findByFlight(Flight flight);
 
     FlightTicket findByIdAndPurchasedTrue(Long id);
+
+    Long countByFlightAndPurchasedTrue(Flight flight);
 }

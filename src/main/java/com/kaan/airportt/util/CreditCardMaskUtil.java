@@ -1,6 +1,6 @@
 package com.kaan.airportt.util;
 
-public class CreditCardMask {
+public class CreditCardMaskUtil {
     public static String maskCreditCardNumber(String creditCardNumber) {
         char delimeter = creditCardNumber.charAt(4);
         if (!Character.isDigit(delimeter)){
