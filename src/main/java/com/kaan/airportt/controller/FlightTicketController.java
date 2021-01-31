@@ -96,15 +96,18 @@ public class FlightTicketController extends AbstractController {
 
                     flightTicket.setPurchased(false);
                     Optional<Flight> flightOptional = flightService.findById(flightTicket.getFlight().getId());
-                    flightOptional.ifPresent(flight -> flightTicket.setPrice(flight.getBasePrice()));
-                    flightTicketService.saveAndUpdate(flightTicket);
+                    if (flightOptional.isPresent()){
+                        Flight flight = flightOptional.get();
+                        flightTicket.setPrice(flight.getBasePrice());
+                        flightTicketService.saveAndUpdate(flightTicket);
 
-                    if (flightTicketService.getPurchasedTicketCount(flightOptional.get()) == 0) {
-                        TicketPriceCalculator.setLastSoldTicketPrice(flightOptional.get().getBasePrice());
-                    } else {
-                        TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
+                        if (flightTicketService.getPurchasedTicketCount(flightOptional.get()) == 0) {
+                            TicketPriceCalculator.setLastSoldTicketPrice(flightOptional.get().getBasePrice());
+                        } else {
+                            TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
+                        }
+                        return new Response<>(getMessage("flight.ticket.with.id.cancelled", flightTicketId) ,HttpStatus.OK);
                     }
-                    return new Response<>(getMessage("flight.ticket.with.id.cancelled", flightTicketId) ,HttpStatus.OK);
                 }
             }
         }
