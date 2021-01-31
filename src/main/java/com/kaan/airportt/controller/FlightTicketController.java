@@ -6,7 +6,6 @@ import com.kaan.airportt.dto.flightTicket.FlightTicketPostPurchaseDto;
 import com.kaan.airportt.dto.flightTicket.FlightTicketPurchaseDto;
 import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightTicket;
-import com.kaan.airportt.exception.TicketAlreadyPurchasedException;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.mapper.FlightTicketMapper;
 import com.kaan.airportt.service.flight.FlightService;
@@ -15,7 +14,6 @@ import com.kaan.airportt.util.CreditCardMaskUtil;
 import com.kaan.airportt.util.TicketPriceCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

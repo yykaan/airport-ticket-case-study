@@ -2,9 +2,7 @@ package com.kaan.airportt.controller;
 
 import com.kaan.airportt.dto.Response;
 import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
-import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightRoute;
-import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
 import lombok.RequiredArgsConstructor;

@@ -5,7 +5,6 @@ import com.kaan.airportt.dto.airline.AirlineDto;
 import com.kaan.airportt.dto.airline.AirlineSaveDto;
 import com.kaan.airportt.dto.flight.FlightDto;
 import com.kaan.airportt.entity.Airline;
-import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.mapper.AirlineMapper;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.service.airline.AirlineService;
