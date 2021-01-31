@@ -13,6 +13,7 @@ import com.kaan.airportt.service.flightTicket.FlightTicketService;
 import com.kaan.airportt.util.CreditCardMaskUtil;
 import com.kaan.airportt.util.TicketPriceCalculator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/flightTicket")
@@ -51,6 +53,7 @@ public class FlightTicketController extends AbstractController {
     public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) {
         if (flightTicketService.existsById(flightTicketPurchaseDto.getTicketId())) {
             if (flightTicketService.isPurchased(flightTicketPurchaseDto.getTicketId())) {
+                log.info(getMessage("flight.ticket.with.id.already.purchased") + flightTicketPurchaseDto.getTicketId());
                 return new Response<>(getMessage("flight.ticket.with.id.already.purchased", flightTicketPurchaseDto.getTicketId()), HttpStatus.BAD_REQUEST);
             }
             Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketPurchaseDto.getTicketId());
@@ -78,10 +81,14 @@ public class FlightTicketController extends AbstractController {
                 flightTicketPostPurchaseDto.setPrice(purchasedTicket.getPrice());
                 flightTicketPostPurchaseDto.setCreditCardNumber(CreditCardMaskUtil.maskCreditCardNumber(flightTicketPurchaseDto.getCreditCardNumber()));
 
+                flightTicketPostPurchaseDto.getFlight().getFlightRoute().setFlight(null);
+                flightTicketPostPurchaseDto.getFlight().getAirline().setFlights(null);
+                log.info(getMessage("flight.ticket.purchased") + flightTicketPostPurchaseDto.toString());
                 return new Response<>(flightTicketPostPurchaseDto, HttpStatus.OK, getMessage("flight.ticket.purchased"));
             }
 
         }
+        log.info(getMessage("flight.ticket.with.id.could.not.be.found",flightTicketPurchaseDto.getTicketId()));
         return new Response<>(getMessage("flight.ticket.with.id.could.not.be.found", flightTicketPurchaseDto.getTicketId()),HttpStatus.NOT_FOUND);
     }
 
@@ -106,11 +113,16 @@ public class FlightTicketController extends AbstractController {
                         } else {
                             TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
                         }
+                        flightTicket.getFlight().getAirline().setFlights(null);
+                        flightTicket.getFlight().getFlightRoute().setFlight(null);
+                        flight.setFlightTickets(null);
+                        log.info(getMessage("flight.ticket.with.id.cancelled", flightTicketId) + flightTicket.toString());
                         return new Response<>(getMessage("flight.ticket.with.id.cancelled", flightTicketId) ,HttpStatus.OK);
                     }
                 }
             }
         }
+        log.info(getMessage("flight.ticket.with.id.could.not.be.found",flightTicketId));
         return new Response<>(getMessage("flight.ticket.with.id.could.not.be.found", flightTicketId),HttpStatus.NOT_FOUND);
     }
 
@@ -131,10 +143,12 @@ public class FlightTicketController extends AbstractController {
                             .map(flightTicketMapper::toDto)
                             .collect(Collectors.toList()), HttpStatus.OK);
                 } else {
+                    log.info(getMessage("flight.ticket.list.empty"));
                     return new Response<>(getMessage("flight.ticket.list.empty"),HttpStatus.NO_CONTENT);
                 }
             }
         }
+        log.info(getMessage("flight.ticket.with.flight.id.could.not.be.found",flightId));
         return new Response<>(getMessage("flight.ticket.with.flight.id.could.not.be.found", flightId) ,HttpStatus.NOT_FOUND);
     }
 }

@@ -6,6 +6,7 @@ import com.kaan.airportt.entity.FlightRoute;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/flightRoute")
@@ -34,6 +36,7 @@ public class FlightRouteController extends AbstractController{
     public Response<List<FlightRouteDto>> findAll(){
         List<FlightRoute> flightRouteList = (List<FlightRoute>) flightRouteService.findAll();
         if (flightRouteList.isEmpty()){
+            log.info(getMessage("flight.route.list.empty"));
             new Response<>(getMessage("flight.route.list.empty"),HttpStatus.NO_CONTENT);
         }
         return new Response<>(
@@ -50,9 +53,11 @@ public class FlightRouteController extends AbstractController{
             if (optionalFlightRoute.isPresent()){
                 return new Response<>(flightRouteMapper.toDto(optionalFlightRoute.get()), HttpStatus.OK);
             }else {
+                log.info(getMessage("flight.route.with.id.could.not.be.found",id));
                 return new Response<>(getMessage("flight.route.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
             }
         } else {
+            log.info(getMessage("flight.route.with.id.could.not.be.found",id));
             return new Response<>(getMessage("flight.route.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }

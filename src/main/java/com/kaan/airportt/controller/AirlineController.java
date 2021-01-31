@@ -9,6 +9,7 @@ import com.kaan.airportt.mapper.AirlineMapper;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.service.airline.AirlineService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/airline")
@@ -32,6 +34,7 @@ public class AirlineController extends AbstractController {
     @PostMapping("/save")
     public Response<AirlineDto> save(@RequestBody @Valid AirlineSaveDto airport) {
         Airline persistedAirport = airlineService.saveAndUpdate(airlineMapper.saveDtoToEntity(airport));
+        log.info(getMessage("airline.created") + persistedAirport.toString());
         return new Response<>(airlineMapper.toDto(persistedAirport), HttpStatus.CREATED, getMessage("airline.created"));
     }
 
@@ -42,14 +45,17 @@ public class AirlineController extends AbstractController {
             if (optionalAirline.isPresent()){
                 Airline persistedAirline = optionalAirline.get();
                 if (airlineMapper.toEntity(airlineDto).equals(persistedAirline)) {
+                    log.info(getMessage("airline.updated" + persistedAirline.toString()));
                     return new Response<>(airlineMapper.toDto(persistedAirline), HttpStatus.OK, getMessage("airline.updated"));
                 } else {
                     return new Response<>(airlineMapper.toDto(airlineService.saveAndUpdate(airlineMapper.toEntity(airlineDto))), HttpStatus.OK);
                 }
             }else {
+                log.info(getMessage("airline.with.id.could.not.be.found",id));
                 return new Response<>(getMessage("airline.with.id.could.not.be.found",id), HttpStatus.NOT_FOUND);
             }
         } else {
+            log.info(getMessage("airline.with.id.could.not.be.found",id));
             return new Response<>(getMessage("airline.with.id.could.not.be.found",id), HttpStatus.NOT_FOUND);
         }
     }
@@ -58,6 +64,7 @@ public class AirlineController extends AbstractController {
     public Response<List<AirlineDto>> findAll() {
         List<Airline> airlineList = (List<Airline>) airlineService.findAll();
         if (airlineList.isEmpty()) {
+            log.info(getMessage("airline.list.empty"));
             new Response<>(getMessage("airline.list.empty"),HttpStatus.NO_CONTENT);
         }
         List<AirlineDto> airlineDtoList = airlineList.stream()
@@ -73,9 +80,11 @@ public class AirlineController extends AbstractController {
             if (airlineOptional.isPresent()){
                 return new Response<>(airlineMapper.toDto(airlineOptional.get()), HttpStatus.OK);
             }else {
+                log.info(getMessage("airline.with.id.could.not.be.found",id));
                 return new Response<>(getMessage("airline.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
             }
         } else {
+            log.info(getMessage("airline.with.id.could.not.be.found",id));
             return new Response<>(getMessage("airline.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
@@ -84,6 +93,7 @@ public class AirlineController extends AbstractController {
     public Response<List<AirlineDto>> findByName(@RequestBody AirlineSaveDto name) {
         List<Airline> airlineList = airlineService.findByName(name.getName());
         if (airlineList.isEmpty()) {
+            log.info(getMessage("airline.with.name.could.not.be.found",name.getName()));
             return new Response<>(getMessage("airline.with.name.could.not.be.found",name.getName()),HttpStatus.NO_CONTENT);
         } else {
             return new Response<>(airlineList
@@ -100,6 +110,7 @@ public class AirlineController extends AbstractController {
                 .map(flightMapper::toEntity)
                 .collect(Collectors.toList()));
         if (airlineList.isEmpty()) {
+            log.info(getMessage("airline.with.flight.list.not.found"));
             return new Response<>(getMessage("airline.with.flight.list.not.found") , HttpStatus.NO_CONTENT);
         } else {
             return new Response<>(airlineList
@@ -113,9 +124,10 @@ public class AirlineController extends AbstractController {
     public Response<?> deleteById(@PathVariable Long id) {
         if (airlineService.existsById(id)) {
             airlineService.deleteById(id);
-            return new Response<>(getMessage("airline.with.id.deleted"),HttpStatus.OK);
+            log.info(getMessage("airline.with.id.deleted",id));
+            return new Response<>(getMessage("airline.with.id.deleted",id),HttpStatus.OK);
         } else {
-            return new Response<>(getMessage("airline.with.id.could.not.be.found"),HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("airline.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
 

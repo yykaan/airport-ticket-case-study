@@ -3,12 +3,14 @@ package com.kaan.airportt.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
 @Entity
+@ToString
 @Table(name = "FLIGHT_ROUTE")
 public class FlightRoute extends BaseEntity{
 

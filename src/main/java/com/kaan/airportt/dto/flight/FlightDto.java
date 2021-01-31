@@ -4,16 +4,14 @@ import com.kaan.airportt.dto.BaseDto;
 import com.kaan.airportt.entity.Airline;
 import com.kaan.airportt.entity.FlightRoute;
 import com.kaan.airportt.entity.FlightTicket;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class FlightDto extends BaseDto {

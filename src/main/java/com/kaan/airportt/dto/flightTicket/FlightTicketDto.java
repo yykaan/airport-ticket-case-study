@@ -3,15 +3,13 @@ package com.kaan.airportt.dto.flightTicket;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kaan.airportt.dto.BaseDto;
 import com.kaan.airportt.entity.Flight;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class FlightTicketDto extends BaseDto {
