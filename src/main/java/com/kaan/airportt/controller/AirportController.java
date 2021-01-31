@@ -1,18 +1,20 @@
 package com.kaan.airportt.controller;
 
+import com.kaan.airportt.dto.Response;
 import com.kaan.airportt.dto.airport.AirportDto;
+import com.kaan.airportt.entity.Airline;
 import com.kaan.airportt.entity.Airport;
 import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.mapper.AirportMapper;
 import com.kaan.airportt.service.airport.AirportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -25,32 +27,37 @@ public class AirportController extends AbstractController {
     private final AirportMapper airportMapper;
 
     @PostMapping("/save")
-    public ResponseEntity<AirportDto> save(@RequestBody @Valid AirportDto airport) {
+    public Response<AirportDto> save(@RequestBody @Valid AirportDto airport) {
         Airport savedAirport = airportService.saveAndUpdate(airportMapper.toEntity(airport));
-        return new ResponseEntity<>(airportMapper.toDto(savedAirport), HttpStatus.CREATED);
+        return new Response<>(airportMapper.toDto(savedAirport), HttpStatus.CREATED, "Airport created");
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<AirportDto> update(@RequestBody @Valid AirportDto airport, @PathVariable Long id) throws ObjectNotFoundException {
+    public Response<AirportDto> update(@RequestBody @Valid AirportDto airport, @PathVariable Long id) throws ObjectNotFoundException {
         if (airportService.existsById(id)) {
-            Airport persistedAirport = airportService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Airport could not be found!"));
-            if (airportMapper.toEntity(airport).equals(persistedAirport)) {
-                return new ResponseEntity<>(airportMapper.toDto(persistedAirport), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(airportMapper.toDto(airportService.saveAndUpdate(airportMapper.toEntity(airport))), HttpStatus.OK);
+            Optional<Airport> optionalAirport = airportService.findById(id);
+            if (optionalAirport.isPresent()){
+                Airport persistedAirport = optionalAirport.get();
+                if (airportMapper.toEntity(airport).equals(persistedAirport)) {
+                    return new Response<>(airportMapper.toDto(persistedAirport), HttpStatus.OK, "Airport updated");
+                } else {
+                    return new Response<>(airportMapper.toDto(airportService.saveAndUpdate(airportMapper.toEntity(airport))), HttpStatus.OK);
+                }
+            }else {
+                return new Response<>("Airport with ID : " + id + " could not be found", HttpStatus.NO_CONTENT);
             }
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Airport with ID : " + id + " could not be found", HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/listAll")
-    public ResponseEntity<List<AirportDto>> findAll() {
+    public Response<List<AirportDto>> findAll() {
         List<Airport> airportList = (List<Airport>) airportService.findAll();
         if (airportList.isEmpty()) {
-            new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            new Response<>("Airport list is empty", HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(
+        return new Response<List<AirportDto>>(
                 airportList.stream()
                         .map(airportMapper::toDto)
                         .collect(Collectors.toList()),
@@ -58,21 +65,26 @@ public class AirportController extends AbstractController {
     }
 
     @GetMapping("/list/{id}")
-    public ResponseEntity<AirportDto> findById(@PathVariable Long id) {
+    public Response<AirportDto> findById(@PathVariable Long id) {
         if (airportService.existsById(id)) {
-            return new ResponseEntity<>(airportMapper.toDto(airportService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Airport could not be found!"))), HttpStatus.OK);
+            Optional<Airport> optionalAirport = airportService.findById(id);
+            if (optionalAirport.isPresent()){
+                return new Response<>(airportMapper.toDto(optionalAirport.get()), HttpStatus.OK);
+            }else {
+                return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            }
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/list/byName")
-    public ResponseEntity<List<AirportDto>> findByName(@RequestBody AirportDto name) {
+    public Response<List<AirportDto>> findByName(@RequestBody AirportDto name) {
         List<Airport> airportList = airportService.findByName(name.getName());
         if (airportList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Airport with name " + name + " could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(airportList
+            return new Response<List<AirportDto>>(airportList
                     .stream()
                     .map(airportMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
@@ -80,12 +92,12 @@ public class AirportController extends AbstractController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    public Response<Void> deleteById(@PathVariable Long id) {
         if (airportService.existsById(id)) {
             airportService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new Response<>("Airport with ID " + id + " deleted",HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
         }
     }
 }

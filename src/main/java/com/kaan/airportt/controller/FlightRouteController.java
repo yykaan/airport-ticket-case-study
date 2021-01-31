@@ -1,26 +1,28 @@
 package com.kaan.airportt.controller;
 
+import com.kaan.airportt.dto.Response;
 import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
+import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightRoute;
+import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
-import com.kaan.airportt.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/flightRoute")
 @Validated
-/**
- * FlightRoute tanımlama sadece Flight oluştururken olmalı. O yüzden save ve update endpointleri kaldırıldı
- * */
 public class FlightRouteController extends AbstractController{
 
     private final FlightRouteService flightRouteService;
@@ -31,12 +33,12 @@ public class FlightRouteController extends AbstractController{
      * Engelleyemedim bu durumu..
      * */
     @GetMapping("/listAll")
-    public ResponseEntity<List<FlightRouteDto>> findAll(){
+    public Response<List<FlightRouteDto>> findAll(){
         List<FlightRoute> flightRouteList = (List<FlightRoute>) flightRouteService.findAll();
         if (flightRouteList.isEmpty()){
-            new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            new Response<>("Flight route list is empty",HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(
+        return new Response<List<FlightRouteDto>>(
                 flightRouteList.stream()
                         .map(flightRouteMapper::toDto)
                         .collect(Collectors.toList()),
@@ -44,11 +46,16 @@ public class FlightRouteController extends AbstractController{
     }
 
     @GetMapping("/list/{id}")
-    public ResponseEntity<FlightRouteDto> findById(@PathVariable Long id){
-        if (flightRouteService.existsById(id)){
-            return new ResponseEntity<>(flightRouteMapper.toDto(flightRouteService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Flight Route could not be found!"))), HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public Response<FlightRouteDto> findById(@PathVariable Long id){
+        if (flightRouteService.existsById(id)) {
+            Optional<FlightRoute> optionalFlightRoute = flightRouteService.findById(id);
+            if (optionalFlightRoute.isPresent()){
+                return new Response<>(flightRouteMapper.toDto(optionalFlightRoute.get()), HttpStatus.OK);
+            }else {
+                return new Response<>("Flight Route with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new Response<>("Flight Route with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.kaan.airportt.controller;
 
+import com.kaan.airportt.dto.Response;
 import com.kaan.airportt.dto.flightTicket.FlightTicketDto;
 import com.kaan.airportt.dto.flightTicket.FlightTicketPostPurchaseDto;
 import com.kaan.airportt.dto.flightTicket.FlightTicketPurchaseDto;
@@ -14,7 +15,7 @@ import com.kaan.airportt.util.CreditCardMaskUtil;
 import com.kaan.airportt.util.TicketPriceCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,32 +38,29 @@ public class FlightTicketController extends AbstractController {
     private final FlightMapper flightMapper;
 
     @GetMapping("/list/available/byFlightId/{flightId}")
-    public ResponseEntity<List<FlightTicketDto>> listAvailableTickets(
+    public Response<List<FlightTicketDto>> listAvailableTickets(
             @PathVariable Long flightId) {
         return getAllTickets(flightId, true);
     }
 
     @GetMapping("/list/all/byFlightId/{flightId}")
-    public ResponseEntity<List<FlightTicketDto>> listAllTickets(
+    public Response<List<FlightTicketDto>> listAllTickets(
             @PathVariable Long flightId) {
         return getAllTickets(flightId, false);
     }
 
     @PostMapping("/purchase")
-    public ResponseEntity<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) throws TicketAlreadyPurchasedException {
+    public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) throws TicketAlreadyPurchasedException {
         if (flightTicketService.existsById(flightTicketPurchaseDto.getTicketId())) {
             if (flightTicketService.isPurchased(flightTicketPurchaseDto.getTicketId())) {
-                throw new TicketAlreadyPurchasedException("Ticket is already purchased! Try another ticket");
+                return new Response<>("Flight Ticket with ID " + flightTicketPurchaseDto.getTicketId() + " is already purchased!", HttpStatus.BAD_REQUEST);
             }
             Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketPurchaseDto.getTicketId());
             FlightTicket purchasedTicket = null;
             if (flightTicketOptional.isPresent()) {
                 FlightTicket flightTicket = flightTicketOptional.get();
                 flightTicket.setPurchased(true);
-                /**
-                 * Fiyat hesaplaması yap
-                 * Her %10 kontenjan artışında fiyat %10 artacak
-                 * */
+
                 Integer purchasedTicketCount = flightTicketService.getPurchasedTicketCount(flightTicket.getFlight());
                 Optional<Flight> flightOptional = flightService.findById(flightTicket.getFlight().getId());
                 if (flightOptional.isPresent()) {
@@ -82,16 +80,16 @@ public class FlightTicketController extends AbstractController {
                 flightTicketPostPurchaseDto.setPrice(purchasedTicket.getPrice());
                 flightTicketPostPurchaseDto.setCreditCardNumber(CreditCardMaskUtil.maskCreditCardNumber(flightTicketPurchaseDto.getCreditCardNumber()));
 
-                return new ResponseEntity<>(flightTicketPostPurchaseDto, HttpStatus.OK);
+                return new Response<>(flightTicketPostPurchaseDto, HttpStatus.OK, "Flight Ticket purchased!");
             }
 
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new Response<>("Flight Ticket with ID " + flightTicketPurchaseDto.getTicketId() + " could not be found",HttpStatus.NOT_FOUND);
     }
 
     @Transactional
     @PutMapping("/cancelTicket/{flightTicketId}")
-    public ResponseEntity<Void> cancelTicket(@PathVariable Long flightTicketId) {
+    public Response<Void> cancelTicket(@PathVariable Long flightTicketId) {
         if (flightTicketService.existsById(flightTicketId)) {
             Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketId);
             if (flightTicketOptional.isPresent()) {
@@ -108,15 +106,15 @@ public class FlightTicketController extends AbstractController {
                     } else {
                         TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
                     }
-                    return new ResponseEntity<>(HttpStatus.OK);
+                    return new Response<>("Flight ticket with ID " + flightTicketId + " cancelled!" ,HttpStatus.OK);
                 }
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new Response<>("Flight ticket with ID " + flightTicketId + " could not be found",HttpStatus.NOT_FOUND);
     }
 
 
-    private ResponseEntity<List<FlightTicketDto>> getAllTickets(Long flightId, Boolean isNotPurchased) {
+    private Response<List<FlightTicketDto>> getAllTickets(Long flightId, Boolean isNotPurchased) {
         Optional<Flight> optionalFlight = flightService.findById(flightId);
         if (optionalFlight.isPresent()) {
             Flight flight = optionalFlight.get();
@@ -128,14 +126,14 @@ public class FlightTicketController extends AbstractController {
                 }
 
                 if (!flightTickets.isEmpty()) {
-                    return new ResponseEntity<>(flightTickets.stream()
+                    return new Response<List<FlightTicketDto>>(flightTickets.stream()
                             .map(flightTicketMapper::toDto)
                             .collect(Collectors.toList()), HttpStatus.OK);
                 } else {
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                    return new Response<>("Flight Ticket list is empty",HttpStatus.NO_CONTENT);
                 }
             }
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new Response<>("Flight Ticket with Flight ID " + flightId + " could not be found!" ,HttpStatus.NOT_FOUND);
     }
 }

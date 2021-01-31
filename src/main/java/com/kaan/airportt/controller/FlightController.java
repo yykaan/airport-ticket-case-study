@@ -1,21 +1,21 @@
 package com.kaan.airportt.controller;
 
+import com.kaan.airportt.dto.Response;
 import com.kaan.airportt.dto.flight.FlightDto;
 import com.kaan.airportt.dto.flight.FlightSearchByNameDto;
 import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
+import com.kaan.airportt.entity.Airport;
 import com.kaan.airportt.entity.Flight;
-import com.kaan.airportt.entity.FlightRoute;
 import com.kaan.airportt.entity.FlightTicket;
+import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flight.FlightService;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
-import com.kaan.airportt.exception.ObjectNotFoundException;
 import com.kaan.airportt.service.flightTicket.FlightTicketService;
 import com.kaan.airportt.util.TicketNoSequenceCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,13 +34,12 @@ public class FlightController extends AbstractController{
     private final FlightService flightService;
     private final FlightMapper flightMapper;
 
-    private final FlightRouteService flightRouteService;
     private final FlightRouteMapper flightRouteMapper;
 
     private final FlightTicketService flightTicketService;
 
     @PostMapping("/save")
-    public ResponseEntity<FlightDto> save(@RequestBody @Valid FlightDto flightDto) {
+    public Response<FlightDto> save(@RequestBody @Valid FlightDto flightDto) {
         Flight savedFlight = flightService.saveAndUpdate(flightMapper.toEntity(flightDto));
         Integer passengerCapacity = flightDto.getPassengerCapacity();
 
@@ -55,30 +54,35 @@ public class FlightController extends AbstractController{
 
         flightTicketService.saveAll(flightTicketList);
 
-        return new ResponseEntity<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED);
+        return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED, "Flight created");
     }
 
     @PostMapping("/update/{id}")
-    public ResponseEntity<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) throws ObjectNotFoundException {
+    public Response<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) throws ObjectNotFoundException {
         if (flightService.existsById(id)){
-            Flight savedFlight = flightService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Flight could not be found!"));
-            if (flightMapper.toEntity(flightDto).equals(savedFlight)){
-                return new ResponseEntity<>(flightMapper.toDto(savedFlight), HttpStatus.OK);
+            Optional<Flight> optionalFlight = flightService.findById(id);
+            if (optionalFlight.isPresent()){
+                Flight savedFlight = flightService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Flight could not be found!"));
+                if (flightMapper.toEntity(flightDto).equals(savedFlight)){
+                    return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.OK, "Flight updated");
+                }else {
+                    return new Response<>(flightMapper.toDto(flightService.saveAndUpdate(flightMapper.toEntity(flightDto))), HttpStatus.OK);
+                }
             }else {
-                return new ResponseEntity<>(flightMapper.toDto(flightService.saveAndUpdate(flightMapper.toEntity(flightDto))), HttpStatus.OK);
+                return new Response<>("Flight with ID + " + id + " could not be found", HttpStatus.NO_CONTENT);
             }
         }else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Flight with ID " + id + " could not be found",HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/listAll")
-    public ResponseEntity<List<FlightDto>> findAll(){
+    public Response<List<FlightDto>> findAll(){
         List<Flight> flightList = (List<Flight>) flightService.findAll();
         if (flightList.isEmpty()){
-            new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            new Response<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(
+        return new Response<List<FlightDto>>(
                 flightList.stream()
                         .map(flightMapper::toDto)
                         .collect(Collectors.toList()),
@@ -86,21 +90,26 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/list/{id}")
-    public ResponseEntity<FlightDto> findById(@PathVariable Long id){
-        if (flightService.existsById(id)){
-            return new ResponseEntity<>(flightMapper.toDto(flightService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Flight could not be found!"))), HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public Response<FlightDto> findById(@PathVariable Long id){
+        if (flightService.existsById(id)) {
+            Optional<Flight> optionalFlight = flightService.findById(id);
+            if (optionalFlight.isPresent()){
+                return new Response<>(flightMapper.toDto(optionalFlight.get()), HttpStatus.OK);
+            }else {
+                return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            }
+        } else {
+            return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
         }
     }
 
     @GetMapping("/list/byName")
-    public ResponseEntity<List<FlightDto>> findByName(@RequestBody FlightSearchByNameDto flightSearchByNameDto) {
+    public Response<List<FlightDto>> findByName(@RequestBody FlightSearchByNameDto flightSearchByNameDto) {
         List<Flight> flightList = flightService.findByName(flightSearchByNameDto.getName());
         if (flightList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Flight with name " + flightSearchByNameDto.getName() + " could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(flightList
+            return new Response<List<FlightDto>>(flightList
                     .stream()
                     .map(flightMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
@@ -108,12 +117,12 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/list/byFlightRoute")
-    public ResponseEntity<List<FlightDto>> findByName(@RequestBody FlightRouteDto flightRoute) {
+    public Response<List<FlightDto>> findByFlightRoute(@RequestBody FlightRouteDto flightRoute) {
         List<Flight> flightList = flightService.findByFlightRoute(flightRouteMapper.toEntity(flightRoute));
         if (flightList.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Flight with provided flight route ( ID "+flightRoute.getId()+" ) could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(flightList
+            return new Response<List<FlightDto>>(flightList
                     .stream()
                     .map(flightMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
@@ -121,12 +130,12 @@ public class FlightController extends AbstractController{
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id){
+    public Response<Void> deleteById(@PathVariable Long id){
         if (flightService.existsById(id)){
             flightService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new Response<>("Flight with ID " + id + " deleted",HttpStatus.OK);
+        } else {
+            return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
         }
     }
 }
