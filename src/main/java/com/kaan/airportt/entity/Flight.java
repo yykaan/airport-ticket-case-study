@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Getter
@@ -30,5 +31,8 @@ public class Flight extends BaseEntity {
 
     @Column(name = "PASSENGER_CAPACITY")
     private Integer passengerCapacity;
+
+    @Column(name = "BASE_PRICE")
+    private BigDecimal basePrice;
 
 }

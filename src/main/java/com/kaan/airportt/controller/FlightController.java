@@ -5,11 +5,14 @@ import com.kaan.airportt.dto.flight.FlightSearchByNameDto;
 import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
 import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightRoute;
+import com.kaan.airportt.entity.FlightTicket;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flight.FlightService;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
 import com.kaan.airportt.exception.ObjectNotFoundException;
+import com.kaan.airportt.service.flightTicket.FlightTicketService;
+import com.kaan.airportt.util.TicketNoSequenceCreator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,9 +37,24 @@ public class FlightController extends AbstractController{
     private final FlightRouteService flightRouteService;
     private final FlightRouteMapper flightRouteMapper;
 
+    private final FlightTicketService flightTicketService;
+
     @PostMapping("/save")
     public ResponseEntity<FlightDto> save(@RequestBody @Valid FlightDto flightDto) {
         Flight savedFlight = flightService.saveAndUpdate(flightMapper.toEntity(flightDto));
+        Integer passengerCapacity = flightDto.getPassengerCapacity();
+
+        List<FlightTicket> flightTicketList = new ArrayList<>();
+        for (int i=0;i<passengerCapacity;i++){
+            FlightTicket flightTicket = new FlightTicket();
+            flightTicket.setFlight(savedFlight);
+            flightTicket.setPrice(flightDto.getBasePrice());
+            flightTicket.setTicketNo(TicketNoSequenceCreator.getInstance().getTicketNumber(flightDto));
+            flightTicketList.add(flightTicket);
+        }
+
+        flightTicketService.saveAll(flightTicketList);
+
         return new ResponseEntity<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED);
     }
 

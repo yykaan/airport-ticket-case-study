@@ -1,5 +1,6 @@
 package com.kaan.airportt.service.flightTicket;
 
+import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightTicket;
 import com.kaan.airportt.repository.FlightTicketRepository;
 import org.springframework.data.domain.Page;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,5 +83,20 @@ public class FlightTicketServiceImpl implements FlightTicketService {
     @Override
     public void deleteAll() {
         repository.deleteAll();
+    }
+
+    @Override
+    public List<FlightTicket> findByFlight(Flight flight) {
+        return repository.findByFlight(flight);
+    }
+
+    @Override
+    public boolean isPurchased(Long ticketId) {
+        FlightTicket flightTicket = repository.findByIdAndPurchasedTrue(ticketId);
+        if (flightTicket == null){
+            return false;
+        }else {
+            return true;
+        }
     }
 }

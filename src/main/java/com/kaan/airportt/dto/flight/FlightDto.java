@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Getter
@@ -27,5 +28,5 @@ public class FlightDto extends BaseDto {
 
     private Integer passengerCapacity;
 
-    private transient String priceFormula;
+    private BigDecimal basePrice;
 }

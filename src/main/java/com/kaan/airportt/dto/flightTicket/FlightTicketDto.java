@@ -1,5 +1,6 @@
 package com.kaan.airportt.dto.flightTicket;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kaan.airportt.dto.BaseDto;
 import com.kaan.airportt.entity.Flight;
 import lombok.AllArgsConstructor;
@@ -15,8 +16,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class FlightTicketDto extends BaseDto {
 
-    private String ticketNo;
+    private Integer ticketNo;
 
+    @JsonIgnore
     private Flight flight;
 
     private BigDecimal price;

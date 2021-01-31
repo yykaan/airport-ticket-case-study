@@ -1,7 +1,13 @@
 package com.kaan.airportt.service.flightTicket;
 
+import com.kaan.airportt.entity.Flight;
 import com.kaan.airportt.entity.FlightTicket;
 import com.kaan.airportt.service.CommonService;
 
+import java.util.List;
+
 public interface FlightTicketService extends CommonService<FlightTicket> {
+    List<FlightTicket> findByFlight(Flight flight);
+
+    boolean isPurchased(Long ticketId);
 }
