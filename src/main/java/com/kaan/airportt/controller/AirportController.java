@@ -27,7 +27,7 @@ public class AirportController extends AbstractController {
     @PostMapping("/save")
     public Response<AirportDto> save(@RequestBody @Valid AirportDto airport) {
         Airport savedAirport = airportService.saveAndUpdate(airportMapper.toEntity(airport));
-        return new Response<>(airportMapper.toDto(savedAirport), HttpStatus.CREATED, "Airport created");
+        return new Response<>(airportMapper.toDto(savedAirport), HttpStatus.CREATED, getMessage("airport.created"));
     }
 
     @PostMapping("/update/{id}")
@@ -37,15 +37,15 @@ public class AirportController extends AbstractController {
             if (optionalAirport.isPresent()){
                 Airport persistedAirport = optionalAirport.get();
                 if (airportMapper.toEntity(airport).equals(persistedAirport)) {
-                    return new Response<>(airportMapper.toDto(persistedAirport), HttpStatus.OK, "Airport updated");
+                    return new Response<>(airportMapper.toDto(persistedAirport), HttpStatus.OK, getMessage("airport.updated"));
                 } else {
                     return new Response<>(airportMapper.toDto(airportService.saveAndUpdate(airportMapper.toEntity(airport))), HttpStatus.OK);
                 }
             }else {
-                return new Response<>("Airport with ID : " + id + " could not be found", HttpStatus.NO_CONTENT);
+                return new Response<>(getMessage("airport.with.id.could.not.be.found", id), HttpStatus.NO_CONTENT);
             }
         } else {
-            return new Response<>("Airport with ID : " + id + " could not be found", HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("airport.with.id.could.not.be.found", id), HttpStatus.NO_CONTENT);
         }
     }
 
@@ -53,7 +53,7 @@ public class AirportController extends AbstractController {
     public Response<List<AirportDto>> findAll() {
         List<Airport> airportList = (List<Airport>) airportService.findAll();
         if (airportList.isEmpty()) {
-            new Response<>("Airport list is empty", HttpStatus.NO_CONTENT);
+            new Response<>(getMessage("airport.list.empty"), HttpStatus.NO_CONTENT);
         }
         return new Response<>(
                 airportList.stream()
@@ -69,10 +69,10 @@ public class AirportController extends AbstractController {
             if (optionalAirport.isPresent()){
                 return new Response<>(airportMapper.toDto(optionalAirport.get()), HttpStatus.OK);
             }else {
-                return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+                return new Response<>(getMessage("airport.with.id.could.not.be.found", id),HttpStatus.NO_CONTENT);
             }
         } else {
-            return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("airport.with.id.could.not.be.found", id),HttpStatus.NO_CONTENT);
         }
     }
 
@@ -80,7 +80,7 @@ public class AirportController extends AbstractController {
     public Response<List<AirportDto>> findByName(@RequestBody AirportDto name) {
         List<Airport> airportList = airportService.findByName(name.getName());
         if (airportList.isEmpty()) {
-            return new Response<>("Airport with name " + name + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("airport.with.name.could.not.be.found", name),HttpStatus.NO_CONTENT);
         } else {
             return new Response<>(airportList
                     .stream()
@@ -93,9 +93,9 @@ public class AirportController extends AbstractController {
     public Response<Void> deleteById(@PathVariable Long id) {
         if (airportService.existsById(id)) {
             airportService.deleteById(id);
-            return new Response<>("Airport with ID " + id + " deleted",HttpStatus.OK);
+            return new Response<>(getMessage("airport.with.id.deleted", id),HttpStatus.OK);
         } else {
-            return new Response<>("Airport with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("airport.with.id.could.not.be.found", id),HttpStatus.NO_CONTENT);
         }
     }
 }

@@ -34,7 +34,7 @@ public class FlightRouteController extends AbstractController{
     public Response<List<FlightRouteDto>> findAll(){
         List<FlightRoute> flightRouteList = (List<FlightRoute>) flightRouteService.findAll();
         if (flightRouteList.isEmpty()){
-            new Response<>("Flight route list is empty",HttpStatus.NO_CONTENT);
+            new Response<>(getMessage("flight.route.list.empty"),HttpStatus.NO_CONTENT);
         }
         return new Response<>(
                 flightRouteList.stream()
@@ -50,10 +50,10 @@ public class FlightRouteController extends AbstractController{
             if (optionalFlightRoute.isPresent()){
                 return new Response<>(flightRouteMapper.toDto(optionalFlightRoute.get()), HttpStatus.OK);
             }else {
-                return new Response<>("Flight Route with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+                return new Response<>(getMessage("flight.route.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
             }
         } else {
-            return new Response<>("Flight Route with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.route.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
 }

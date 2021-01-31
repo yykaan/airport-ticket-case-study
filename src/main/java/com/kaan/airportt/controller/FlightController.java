@@ -51,7 +51,7 @@ public class FlightController extends AbstractController{
 
         flightTicketService.saveAll(flightTicketList);
 
-        return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED, "Flight created");
+        return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED, getMessage("flight.created"));
     }
 
     @PostMapping("/update/{id}")
@@ -61,15 +61,15 @@ public class FlightController extends AbstractController{
             if (optionalFlight.isPresent()){
                 Flight savedFlight = optionalFlight.get();
                 if (flightMapper.toEntity(flightDto).equals(savedFlight)){
-                    return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.OK, "Flight updated");
+                    return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.OK, getMessage("flight.updated"));
                 }else {
                     return new Response<>(flightMapper.toDto(flightService.saveAndUpdate(flightMapper.toEntity(flightDto))), HttpStatus.OK);
                 }
             }else {
-                return new Response<>("Flight with ID + " + id + " could not be found", HttpStatus.NO_CONTENT);
+                return new Response<>(getMessage("flight.with.id.could.not.be.found",id), HttpStatus.NO_CONTENT);
             }
         }else {
-            return new Response<>("Flight with ID " + id + " could not be found",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
 
@@ -77,7 +77,7 @@ public class FlightController extends AbstractController{
     public Response<List<FlightDto>> findAll(){
         List<Flight> flightList = (List<Flight>) flightService.findAll();
         if (flightList.isEmpty()){
-            new Response<>(HttpStatus.NO_CONTENT);
+            new Response<>(getMessage("flight.list.empty"),HttpStatus.NO_CONTENT);
         }
         return new Response<>(
                 flightList.stream()
@@ -93,10 +93,10 @@ public class FlightController extends AbstractController{
             if (optionalFlight.isPresent()){
                 return new Response<>(flightMapper.toDto(optionalFlight.get()), HttpStatus.OK);
             }else {
-                return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+                return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
             }
         } else {
-            return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
 
@@ -104,7 +104,7 @@ public class FlightController extends AbstractController{
     public Response<List<FlightDto>> findByName(@RequestBody FlightSearchByNameDto flightSearchByNameDto) {
         List<Flight> flightList = flightService.findByName(flightSearchByNameDto.getName());
         if (flightList.isEmpty()) {
-            return new Response<>("Flight with name " + flightSearchByNameDto.getName() + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.with.name.could.not.be.found",flightSearchByNameDto.getName()),HttpStatus.NO_CONTENT);
         } else {
             return new Response<>(flightList
                     .stream()
@@ -117,7 +117,7 @@ public class FlightController extends AbstractController{
     public Response<List<FlightDto>> findByFlightRoute(@RequestBody FlightRouteDto flightRoute) {
         List<Flight> flightList = flightService.findByFlightRoute(flightRouteMapper.toEntity(flightRoute));
         if (flightList.isEmpty()) {
-            return new Response<>("Flight with provided flight route ( ID "+flightRoute.getId()+" ) could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.with.flight.route.could.not.be.found", flightRoute.getId()),HttpStatus.NO_CONTENT);
         } else {
             return new Response<>(flightList
                     .stream()
@@ -130,9 +130,9 @@ public class FlightController extends AbstractController{
     public Response<Void> deleteById(@PathVariable Long id){
         if (flightService.existsById(id)){
             flightService.deleteById(id);
-            return new Response<>("Flight with ID " + id + " deleted",HttpStatus.OK);
+            return new Response<>(getMessage("flight.with.id.deleted",id),HttpStatus.OK);
         } else {
-            return new Response<>("Flight with ID " + id + " could not be found!",HttpStatus.NO_CONTENT);
+            return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
         }
     }
 }

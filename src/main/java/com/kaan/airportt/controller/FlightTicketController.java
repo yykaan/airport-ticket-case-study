@@ -51,7 +51,7 @@ public class FlightTicketController extends AbstractController {
     public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) {
         if (flightTicketService.existsById(flightTicketPurchaseDto.getTicketId())) {
             if (flightTicketService.isPurchased(flightTicketPurchaseDto.getTicketId())) {
-                return new Response<>("Flight Ticket with ID " + flightTicketPurchaseDto.getTicketId() + " is already purchased!", HttpStatus.BAD_REQUEST);
+                return new Response<>(getMessage("flight.ticket.with.id.already.purchased", flightTicketPurchaseDto.getTicketId()), HttpStatus.BAD_REQUEST);
             }
             Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketPurchaseDto.getTicketId());
             FlightTicket purchasedTicket = null;
@@ -78,11 +78,11 @@ public class FlightTicketController extends AbstractController {
                 flightTicketPostPurchaseDto.setPrice(purchasedTicket.getPrice());
                 flightTicketPostPurchaseDto.setCreditCardNumber(CreditCardMaskUtil.maskCreditCardNumber(flightTicketPurchaseDto.getCreditCardNumber()));
 
-                return new Response<>(flightTicketPostPurchaseDto, HttpStatus.OK, "Flight Ticket purchased!");
+                return new Response<>(flightTicketPostPurchaseDto, HttpStatus.OK, getMessage("flight.ticket.purchased"));
             }
 
         }
-        return new Response<>("Flight Ticket with ID " + flightTicketPurchaseDto.getTicketId() + " could not be found",HttpStatus.NOT_FOUND);
+        return new Response<>(getMessage("flight.ticket.with.id.could.not.be.found", flightTicketPurchaseDto.getTicketId()),HttpStatus.NOT_FOUND);
     }
 
     @Transactional
@@ -104,11 +104,11 @@ public class FlightTicketController extends AbstractController {
                     } else {
                         TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
                     }
-                    return new Response<>("Flight ticket with ID " + flightTicketId + " cancelled!" ,HttpStatus.OK);
+                    return new Response<>(getMessage("flight.ticket.with.id.cancelled", flightTicketId) ,HttpStatus.OK);
                 }
             }
         }
-        return new Response<>("Flight ticket with ID " + flightTicketId + " could not be found",HttpStatus.NOT_FOUND);
+        return new Response<>(getMessage("flight.ticket.with.id.could.not.be.found", flightTicketId),HttpStatus.NOT_FOUND);
     }
 
 
@@ -128,10 +128,10 @@ public class FlightTicketController extends AbstractController {
                             .map(flightTicketMapper::toDto)
                             .collect(Collectors.toList()), HttpStatus.OK);
                 } else {
-                    return new Response<>("Flight Ticket list is empty",HttpStatus.NO_CONTENT);
+                    return new Response<>(getMessage("flight.ticket.list.empty"),HttpStatus.NO_CONTENT);
                 }
             }
         }
-        return new Response<>("Flight Ticket with Flight ID " + flightId + " could not be found!" ,HttpStatus.NOT_FOUND);
+        return new Response<>(getMessage("flight.ticket.with.flight.id.could.not.be.found", flightId) ,HttpStatus.NOT_FOUND);
     }
 }
