@@ -58,21 +58,6 @@ public class FlightController extends AbstractController{
         return new ResponseEntity<>(flightMapper.toDto(savedFlight), HttpStatus.CREATED);
     }
 
-    @PostMapping("/addFlightRouteToFlight/{flightRouteId}")
-    public ResponseEntity<FlightDto> addFlightRouteToFlight(@PathVariable Long flightRouteId, @RequestBody @Valid FlightDto flightDto){
-        if (flightRouteService.existsById(flightRouteId)){
-            Optional<FlightRoute> flightDtoOptional = flightRouteService.findById(flightRouteId);
-            if (flightDtoOptional.isPresent()){
-                FlightRoute flightRouteDto = flightDtoOptional.get();
-
-                flightDto.setFlightRoute(flightRouteDto);
-                return new ResponseEntity<>(flightMapper.toDto(flightService.saveAndUpdate(flightMapper.toEntity(flightDto))), HttpStatus.CREATED);
-            }
-        }
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
     @PostMapping("/update/{id}")
     public ResponseEntity<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) throws ObjectNotFoundException {
         if (flightService.existsById(id)){
