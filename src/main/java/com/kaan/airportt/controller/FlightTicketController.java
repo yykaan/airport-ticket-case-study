@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class FlightTicketController extends AbstractController {
                  * */
                 Integer purchasedTicketCount = flightTicketService.getPurchasedTicketCount(flightTicket.getFlight());
                 Optional<Flight> flightOptional = flightService.findById(flightTicket.getFlight().getId());
-                if (flightOptional.isPresent()){
+                if (flightOptional.isPresent()) {
                     BigDecimal ticketPrice = TicketPriceCalculator.getInstance().calculateTicketPrice(flightOptional.get(), flightTicket, purchasedTicketCount);
                     flightTicket.setPrice(ticketPrice);
 
@@ -88,6 +89,31 @@ public class FlightTicketController extends AbstractController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Transactional
+    @PutMapping("/cancelTicket/{flightTicketId}")
+    public ResponseEntity<Void> cancelTicket(@PathVariable Long flightTicketId) {
+        if (flightTicketService.existsById(flightTicketId)) {
+            Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketId);
+            if (flightTicketOptional.isPresent()) {
+                FlightTicket flightTicket = flightTicketOptional.get();
+                if (flightTicket.isPurchased()) {
+
+                    flightTicket.setPurchased(false);
+                    Optional<Flight> flightOptional = flightService.findById(flightTicket.getFlight().getId());
+                    flightOptional.ifPresent(flight -> flightTicket.setPrice(flight.getBasePrice()));
+                    flightTicketService.saveAndUpdate(flightTicket);
+
+                    if (flightTicketService.getPurchasedTicketCount(flightOptional.get()) == 0) {
+                        TicketPriceCalculator.setLastSoldTicketPrice(flightOptional.get().getBasePrice());
+                    } else {
+                        TicketPriceCalculator.setLastSoldTicketPrice(flightTicketService.getLastPurchasedTicketPrice());
+                    }
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
 
     private ResponseEntity<List<FlightTicketDto>> getAllTickets(Long flightId, Boolean isNotPurchased) {

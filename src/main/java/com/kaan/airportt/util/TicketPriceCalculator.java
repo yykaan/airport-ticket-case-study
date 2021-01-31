@@ -45,4 +45,7 @@ public class TicketPriceCalculator {
         return lastSoldTicketPrice;
     }
 
+    public static void setLastSoldTicketPrice(BigDecimal lastSoldTicketPrice) {
+        TicketPriceCalculator.lastSoldTicketPrice = lastSoldTicketPrice;
+    }
 }

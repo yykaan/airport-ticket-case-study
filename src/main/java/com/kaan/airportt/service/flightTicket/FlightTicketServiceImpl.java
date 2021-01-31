@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,5 +101,10 @@ public class FlightTicketServiceImpl implements FlightTicketService {
     public Integer getPurchasedTicketCount(Flight flight) {
         Long purchasedTicketCount = repository.countByFlightAndPurchasedTrue(flight);
         return Math.toIntExact(purchasedTicketCount);
+    }
+
+    @Override
+    public BigDecimal getLastPurchasedTicketPrice() {
+        return repository.findFirstByPurchasedTrueOrderByUpdatedDateDesc().getPrice();
     }
 }
