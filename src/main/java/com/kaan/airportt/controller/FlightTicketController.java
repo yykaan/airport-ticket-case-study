@@ -50,7 +50,7 @@ public class FlightTicketController extends AbstractController {
     }
 
     @PostMapping("/purchase")
-    public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) throws TicketAlreadyPurchasedException {
+    public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) {
         if (flightTicketService.existsById(flightTicketPurchaseDto.getTicketId())) {
             if (flightTicketService.isPurchased(flightTicketPurchaseDto.getTicketId())) {
                 return new Response<>("Flight Ticket with ID " + flightTicketPurchaseDto.getTicketId() + " is already purchased!", HttpStatus.BAD_REQUEST);
@@ -126,7 +126,7 @@ public class FlightTicketController extends AbstractController {
                 }
 
                 if (!flightTickets.isEmpty()) {
-                    return new Response<List<FlightTicketDto>>(flightTickets.stream()
+                    return new Response<>(flightTickets.stream()
                             .map(flightTicketMapper::toDto)
                             .collect(Collectors.toList()), HttpStatus.OK);
                 } else {

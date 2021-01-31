@@ -38,7 +38,7 @@ public class FlightRouteController extends AbstractController{
         if (flightRouteList.isEmpty()){
             new Response<>("Flight route list is empty",HttpStatus.NO_CONTENT);
         }
-        return new Response<List<FlightRouteDto>>(
+        return new Response<>(
                 flightRouteList.stream()
                         .map(flightRouteMapper::toDto)
                         .collect(Collectors.toList()),

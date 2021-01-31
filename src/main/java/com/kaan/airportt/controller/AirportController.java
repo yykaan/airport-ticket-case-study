@@ -33,7 +33,7 @@ public class AirportController extends AbstractController {
     }
 
     @PostMapping("/update/{id}")
-    public Response<AirportDto> update(@RequestBody @Valid AirportDto airport, @PathVariable Long id) throws ObjectNotFoundException {
+    public Response<AirportDto> update(@RequestBody @Valid AirportDto airport, @PathVariable Long id) {
         if (airportService.existsById(id)) {
             Optional<Airport> optionalAirport = airportService.findById(id);
             if (optionalAirport.isPresent()){
@@ -57,7 +57,7 @@ public class AirportController extends AbstractController {
         if (airportList.isEmpty()) {
             new Response<>("Airport list is empty", HttpStatus.NO_CONTENT);
         }
-        return new Response<List<AirportDto>>(
+        return new Response<>(
                 airportList.stream()
                         .map(airportMapper::toDto)
                         .collect(Collectors.toList()),
@@ -84,7 +84,7 @@ public class AirportController extends AbstractController {
         if (airportList.isEmpty()) {
             return new Response<>("Airport with name " + name + " could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new Response<List<AirportDto>>(airportList
+            return new Response<>(airportList
                     .stream()
                     .map(airportMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);

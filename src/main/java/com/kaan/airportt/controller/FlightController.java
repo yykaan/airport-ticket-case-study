@@ -58,11 +58,11 @@ public class FlightController extends AbstractController{
     }
 
     @PostMapping("/update/{id}")
-    public Response<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) throws ObjectNotFoundException {
+    public Response<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) {
         if (flightService.existsById(id)){
             Optional<Flight> optionalFlight = flightService.findById(id);
             if (optionalFlight.isPresent()){
-                Flight savedFlight = flightService.findById(id).orElseThrow(() -> new ObjectNotFoundException("Flight could not be found!"));
+                Flight savedFlight = optionalFlight.get();
                 if (flightMapper.toEntity(flightDto).equals(savedFlight)){
                     return new Response<>(flightMapper.toDto(savedFlight), HttpStatus.OK, "Flight updated");
                 }else {
@@ -82,7 +82,7 @@ public class FlightController extends AbstractController{
         if (flightList.isEmpty()){
             new Response<>(HttpStatus.NO_CONTENT);
         }
-        return new Response<List<FlightDto>>(
+        return new Response<>(
                 flightList.stream()
                         .map(flightMapper::toDto)
                         .collect(Collectors.toList()),
@@ -109,7 +109,7 @@ public class FlightController extends AbstractController{
         if (flightList.isEmpty()) {
             return new Response<>("Flight with name " + flightSearchByNameDto.getName() + " could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new Response<List<FlightDto>>(flightList
+            return new Response<>(flightList
                     .stream()
                     .map(flightMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
@@ -122,7 +122,7 @@ public class FlightController extends AbstractController{
         if (flightList.isEmpty()) {
             return new Response<>("Flight with provided flight route ( ID "+flightRoute.getId()+" ) could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new Response<List<FlightDto>>(flightList
+            return new Response<>(flightList
                     .stream()
                     .map(flightMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);

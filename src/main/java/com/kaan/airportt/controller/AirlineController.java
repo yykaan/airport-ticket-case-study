@@ -37,7 +37,7 @@ public class AirlineController extends AbstractController {
     }
 
     @PutMapping("/update/{id}")
-    public Response<AirlineDto> update(@RequestBody @Valid AirlineDto airlineDto, @PathVariable Long id) throws ObjectNotFoundException {
+    public Response<AirlineDto> update(@RequestBody @Valid AirlineDto airlineDto, @PathVariable Long id) {
         if (airlineService.existsById(id)) {
             Optional<Airline> optionalAirline = airlineService.findById(id);
             if (optionalAirline.isPresent()){
@@ -64,7 +64,7 @@ public class AirlineController extends AbstractController {
         List<AirlineDto> airlineDtoList = airlineList.stream()
                 .map(airlineMapper::toDto)
                 .collect(Collectors.toList());
-        return new Response<List<AirlineDto>>(airlineDtoList, HttpStatus.OK);
+        return new Response<>(airlineDtoList, HttpStatus.OK);
     }
 
     @GetMapping("/list/{id}")
@@ -87,7 +87,7 @@ public class AirlineController extends AbstractController {
         if (airlineList.isEmpty()) {
             return new Response<>("Airline with name " + name + " could not be found!",HttpStatus.NO_CONTENT);
         } else {
-            return new Response<List<AirlineDto>>(airlineList
+            return new Response<>(airlineList
                     .stream()
                     .map(airlineMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
@@ -103,7 +103,7 @@ public class AirlineController extends AbstractController {
         if (airlineList.isEmpty()) {
             return new Response<>("Airline with provided flight list could not be found!" , HttpStatus.NO_CONTENT);
         } else {
-            return new Response<List<AirlineDto>>(airlineList
+            return new Response<>(airlineList
                     .stream()
                     .map(airlineMapper::toDto)
                     .collect(Collectors.toList()), HttpStatus.OK);
