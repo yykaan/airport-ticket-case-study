@@ -1,6 +1,8 @@
 package com.kaan.airportt.dto.flightRoute;
 
 import com.kaan.airportt.dto.BaseDto;
+import com.kaan.airportt.dto.airport.AirportDto;
+import com.kaan.airportt.dto.flight.FlightDto;
 import com.kaan.airportt.entity.Airport;
 import com.kaan.airportt.entity.Flight;
 import io.swagger.annotations.ApiModel;
@@ -16,11 +18,11 @@ import lombok.*;
 public class FlightRouteDto extends BaseDto {
 
     @ApiModelProperty(value = "Flight route's Flight")
-    private Flight flight;
+    private FlightDto flight;
 
     @ApiModelProperty(value = "Arrival airport for the Flight")
-    private Airport arrivalAirport;
+    private AirportDto arrivalAirport;
 
     @ApiModelProperty(value = "Departure airport for the flight")
-    private Airport departureAirport;
+    private AirportDto departureAirport;
 }

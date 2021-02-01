@@ -1,5 +1,6 @@
 package com.kaan.airportt.dto.airline;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kaan.airportt.dto.BaseDto;
 import com.kaan.airportt.dto.flight.FlightDto;
 import io.swagger.annotations.ApiModel;
@@ -21,6 +22,7 @@ public class AirlineDto extends BaseDto {
     @ApiModelProperty(value = "Airline's name field")
     private String name;
 
+    @JsonIgnore
     @ApiModelProperty(value = "Airline's Flight list")
     private Set<FlightDto> flights;
 }

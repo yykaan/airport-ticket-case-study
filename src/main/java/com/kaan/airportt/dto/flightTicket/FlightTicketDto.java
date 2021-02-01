@@ -2,6 +2,7 @@ package com.kaan.airportt.dto.flightTicket;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kaan.airportt.dto.BaseDto;
+import com.kaan.airportt.dto.flight.FlightDto;
 import com.kaan.airportt.entity.Flight;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +23,7 @@ public class FlightTicketDto extends BaseDto {
 
     @JsonIgnore
     @ApiModelProperty(value = "Flight Tickets' Flight")
-    private Flight flight;
+    private FlightDto flight;
 
     @ApiModelProperty(value = "Price for each ticket, price is automatically calculated based on Flight's sold ticket number")
     private BigDecimal price;

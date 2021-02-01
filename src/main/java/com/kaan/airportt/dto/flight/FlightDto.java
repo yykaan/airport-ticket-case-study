@@ -1,9 +1,9 @@
 package com.kaan.airportt.dto.flight;
 
 import com.kaan.airportt.dto.BaseDto;
-import com.kaan.airportt.entity.Airline;
-import com.kaan.airportt.entity.FlightRoute;
-import com.kaan.airportt.entity.FlightTicket;
+import com.kaan.airportt.dto.airline.AirlineDto;
+import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
+import com.kaan.airportt.dto.flightTicket.FlightTicketDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -23,13 +23,13 @@ public class FlightDto extends BaseDto {
     private String name;
 
     @ApiModelProperty(value = "Airline that creates the Flight")
-    private Airline airline;
+    private AirlineDto airline;
 
     @ApiModelProperty(value = "Flight's available ticket")
-    private Set<FlightTicket> flightTickets;
+    private Set<FlightTicketDto> flightTickets;
 
     @ApiModelProperty(value = "Flight route of the flight")
-    private FlightRoute flightRoute;
+    private FlightRouteDto flightRoute;
 
     @ApiModelProperty(value = "Maximum number of passenger, Flight Tickets created based on this field")
     private Integer passengerCapacity;
