@@ -12,6 +12,8 @@ import com.kaan.airportt.service.flight.FlightService;
 import com.kaan.airportt.service.flightTicket.FlightTicketService;
 import com.kaan.airportt.util.CreditCardMaskUtil;
 import com.kaan.airportt.util.TicketPriceCalculator;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/flightTicket")
 @Validated
+@Api(value = "Flight Ticket API documentation")
 public class FlightTicketController extends AbstractController {
 
     private final FlightTicketService flightTicketService;
@@ -37,6 +40,7 @@ public class FlightTicketController extends AbstractController {
     private final FlightService flightService;
     private final FlightMapper flightMapper;
 
+    @ApiOperation(value = "Lists all available Flight Tickets for given Flight ID")
     @GetMapping("/list/available/byFlightId/{flightId}")
     public Response<List<FlightTicketDto>> listAvailableTickets(
             @PathVariable Long flightId) {
@@ -44,12 +48,20 @@ public class FlightTicketController extends AbstractController {
     }
 
     @GetMapping("/list/all/byFlightId/{flightId}")
+    @ApiOperation(value = "Lists all unsold and sold Flight Tickets combined for given Flight ID")
     public Response<List<FlightTicketDto>> listAllTickets(
             @PathVariable Long flightId) {
         return getAllTickets(flightId, false);
     }
 
+    @Transactional
     @PostMapping("/purchase")
+    @ApiOperation(value = "Purchase Flight Ticket with given Flight Ticket ID and credit card number. " +
+            "Checks if any Flight associated with Flight Ticket ID." +
+            "Checks if Flight Ticket is previously sold or not." +
+            "Automatically calculates the Flight Ticket price." +
+            "Automatically masks given credit card numbers." +
+            "")
     public Response<FlightTicketPostPurchaseDto> purchaseTicket(@RequestBody FlightTicketPurchaseDto flightTicketPurchaseDto) {
         if (flightTicketService.existsById(flightTicketPurchaseDto.getTicketId())) {
             if (flightTicketService.isPurchased(flightTicketPurchaseDto.getTicketId())) {
@@ -94,6 +106,9 @@ public class FlightTicketController extends AbstractController {
 
     @Transactional
     @PutMapping("/cancelTicket/{flightTicketId}")
+    @ApiOperation(value = "Cancels previously purchased Flight Ticket with given ID." +
+            "Checks if given Flight Ticket is valid." +
+            "If cancellation is successful, price will be recalculated automatically.")
     public Response<Void> cancelTicket(@PathVariable Long flightTicketId) {
         if (flightTicketService.existsById(flightTicketId)) {
             Optional<FlightTicket> flightTicketOptional = flightTicketService.findById(flightTicketId);

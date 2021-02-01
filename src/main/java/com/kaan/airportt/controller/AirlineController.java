@@ -8,6 +8,8 @@ import com.kaan.airportt.entity.Airline;
 import com.kaan.airportt.mapper.AirlineMapper;
 import com.kaan.airportt.mapper.FlightMapper;
 import com.kaan.airportt.service.airline.AirlineService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/airline")
 @Validated
+@Api(value = "Airline API documentation")
 public class AirlineController extends AbstractController {
 
     private final AirlineService airlineService;
@@ -32,6 +35,7 @@ public class AirlineController extends AbstractController {
     private final FlightMapper flightMapper;
 
     @PostMapping("/save")
+    @ApiOperation(value = "New Airline adding operation")
     public Response<AirlineDto> save(@RequestBody @Valid AirlineSaveDto airport) {
         Airline persistedAirport = airlineService.saveAndUpdate(airlineMapper.saveDtoToEntity(airport));
         log.info(getMessage("airline.created") + persistedAirport.toString());
@@ -39,6 +43,7 @@ public class AirlineController extends AbstractController {
     }
 
     @PutMapping("/update/{id}")
+    @ApiOperation(value = "Updating existing Airline with ID field")
     public Response<AirlineDto> update(@RequestBody @Valid AirlineDto airlineDto, @PathVariable Long id) {
         if (airlineService.existsById(id)) {
             Optional<Airline> optionalAirline = airlineService.findById(id);
@@ -61,6 +66,7 @@ public class AirlineController extends AbstractController {
     }
 
     @GetMapping("/listAll")
+    @ApiOperation(value = "Listing all persisted Airlines")
     public Response<List<AirlineDto>> findAll() {
         List<Airline> airlineList = (List<Airline>) airlineService.findAll();
         if (airlineList.isEmpty()) {
@@ -74,6 +80,7 @@ public class AirlineController extends AbstractController {
     }
 
     @GetMapping("/list/{id}")
+    @ApiOperation(value = "Search Airline by ID field")
     public Response<AirlineDto> findById(@PathVariable Long id) {
         if (airlineService.existsById(id)) {
             Optional<Airline> airlineOptional = airlineService.findById(id);
@@ -90,6 +97,7 @@ public class AirlineController extends AbstractController {
     }
 
     @GetMapping("/list/byName")
+    @ApiOperation(value = "Search airline with NAME field with DTO")
     public Response<List<AirlineDto>> findByName(@RequestBody AirlineSaveDto name) {
         List<Airline> airlineList = airlineService.findByName(name.getName());
         if (airlineList.isEmpty()) {
@@ -104,7 +112,8 @@ public class AirlineController extends AbstractController {
     }
 
     @GetMapping("/list/byFlightList")
-    public Response<List<AirlineDto>> findByName(@RequestBody List<FlightDto> flightList) {
+    @ApiOperation(value = "Search airlines with Flight list")
+    public Response<List<AirlineDto>> findAirlineByFlightList(@RequestBody List<FlightDto> flightList) {
         List<Airline> airlineList = airlineService.findByFlightList(
                 flightList.stream()
                 .map(flightMapper::toEntity)
@@ -121,6 +130,7 @@ public class AirlineController extends AbstractController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @ApiOperation(value = "Delete airline with ID field")
     public Response<?> deleteById(@PathVariable Long id) {
         if (airlineService.existsById(id)) {
             airlineService.deleteById(id);

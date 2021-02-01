@@ -5,6 +5,8 @@ import com.kaan.airportt.dto.airport.AirportDto;
 import com.kaan.airportt.entity.Airport;
 import com.kaan.airportt.mapper.AirportMapper;
 import com.kaan.airportt.service.airport.AirportService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,12 +23,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/airport")
 @Validated
+@Api(value = "Airport API documentation")
 public class AirportController extends AbstractController {
 
     private final AirportService airportService;
     private final AirportMapper airportMapper;
 
     @PostMapping("/save")
+    @ApiOperation(value = "New Airport adding operation")
     public Response<AirportDto> save(@RequestBody @Valid AirportDto airport) {
         Airport savedAirport = airportService.saveAndUpdate(airportMapper.toEntity(airport));
         log.info(getMessage("airport.created") + airport.toString());
@@ -34,6 +38,7 @@ public class AirportController extends AbstractController {
     }
 
     @PostMapping("/update/{id}")
+    @ApiOperation(value = "Updating existing Airport with ID field")
     public Response<AirportDto> update(@RequestBody @Valid AirportDto airport, @PathVariable Long id) {
         if (airportService.existsById(id)) {
             Optional<Airport> optionalAirport = airportService.findById(id);
@@ -56,6 +61,7 @@ public class AirportController extends AbstractController {
     }
 
     @GetMapping("/listAll")
+    @ApiOperation(value = "Listing all persisted Airports")
     public Response<List<AirportDto>> findAll() {
         List<Airport> airportList = (List<Airport>) airportService.findAll();
         if (airportList.isEmpty()) {
@@ -70,6 +76,7 @@ public class AirportController extends AbstractController {
     }
 
     @GetMapping("/list/{id}")
+    @ApiOperation(value = "Search Airport by ID field")
     public Response<AirportDto> findById(@PathVariable Long id) {
         if (airportService.existsById(id)) {
             Optional<Airport> optionalAirport = airportService.findById(id);
@@ -86,6 +93,7 @@ public class AirportController extends AbstractController {
     }
 
     @GetMapping("/list/byName")
+    @ApiOperation(value = "Search Airport with NAME field with DTO")
     public Response<List<AirportDto>> findByName(@RequestBody AirportDto name) {
         List<Airport> airportList = airportService.findByName(name.getName());
         if (airportList.isEmpty()) {
@@ -100,6 +108,7 @@ public class AirportController extends AbstractController {
     }
 
     @DeleteMapping("/delete/{id}")
+    @ApiOperation(value = "Delete Airport with ID field")
     public Response<Void> deleteById(@PathVariable Long id) {
         if (airportService.existsById(id)) {
             airportService.deleteById(id);

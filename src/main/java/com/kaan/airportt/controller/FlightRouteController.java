@@ -5,6 +5,8 @@ import com.kaan.airportt.dto.flightRoute.FlightRouteDto;
 import com.kaan.airportt.entity.FlightRoute;
 import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flightRoute.FlightRouteService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/flightRoute")
 @Validated
+@Api(value = "Flight Route API documentation")
 public class FlightRouteController extends AbstractController{
 
     private final FlightRouteService flightRouteService;
@@ -33,6 +36,7 @@ public class FlightRouteController extends AbstractController{
      * Engelleyemedim bu durumu..
      * */
     @GetMapping("/listAll")
+    @ApiOperation(value = "Lists all Flight Routes")
     public Response<List<FlightRouteDto>> findAll(){
         List<FlightRoute> flightRouteList = (List<FlightRoute>) flightRouteService.findAll();
         if (flightRouteList.isEmpty()){
@@ -47,6 +51,7 @@ public class FlightRouteController extends AbstractController{
     }
 
     @GetMapping("/list/{id}")
+    @ApiOperation(value = "Lists Flight Route with given ID field")
     public Response<FlightRouteDto> findById(@PathVariable Long id){
         if (flightRouteService.existsById(id)) {
             Optional<FlightRoute> optionalFlightRoute = flightRouteService.findById(id);

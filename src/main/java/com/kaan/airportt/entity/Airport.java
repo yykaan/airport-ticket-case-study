@@ -1,5 +1,7 @@
 package com.kaan.airportt.entity;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,8 +16,11 @@ import javax.validation.constraints.NotBlank;
 @Entity
 @ToString
 @Table(name = "AIRPORT")
+@ApiModel(value = "Airport Entity Documentation", description = "Entity")
 public class Airport extends BaseEntity {
+
     @NotBlank
     @Column(name = "NAME")
+    @ApiModelProperty(value = "Airport's name field")
     private String name;
 }

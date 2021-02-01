@@ -1,5 +1,6 @@
 package com.kaan.airportt.dto;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,15 +11,12 @@ import org.springframework.http.HttpStatus;
 @Setter
 @ToString
 @NoArgsConstructor
+@ApiModel(value = "Base REST Response documentation", description = "Used for REST responses. Contains response model, HttpStatus, error status and message")
 public class Response<T> {
     private T responseObject;
     private HttpStatus httpStatus;
     private boolean error = false;
     private String message = "";
-
-    public Response(T responseObject) {
-        this.responseObject = responseObject;
-    }
 
     public Response(T responseObject, HttpStatus httpStatus) {
         this.responseObject = responseObject;

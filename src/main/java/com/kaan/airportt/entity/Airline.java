@@ -1,6 +1,8 @@
 package com.kaan.airportt.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,13 +19,16 @@ import java.util.Set;
 @Entity
 @ToString
 @Table(name = "AIRLINE")
+@ApiModel(value = "Airline Entity Documentation", description = "Entity")
 public class Airline extends BaseEntity {
 
     @NotBlank
     @Column(name = "NAME")
+    @ApiModelProperty(value = "Airline's name field")
     private String name;
 
     @JsonIgnore
     @OneToMany(mappedBy="airline")
+    @ApiModelProperty(value = "Airline's FLight list")
     private Set<Flight> flights;
 }

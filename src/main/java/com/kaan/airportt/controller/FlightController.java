@@ -11,6 +11,8 @@ import com.kaan.airportt.mapper.FlightRouteMapper;
 import com.kaan.airportt.service.flight.FlightService;
 import com.kaan.airportt.service.flightTicket.FlightTicketService;
 import com.kaan.airportt.util.TicketNoSequenceCreator;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/flight")
 @Validated
+@Api(value = "Flight API documentation")
 public class FlightController extends AbstractController{
     
     private final FlightService flightService;
@@ -38,6 +41,8 @@ public class FlightController extends AbstractController{
     private final FlightTicketService flightTicketService;
 
     @PostMapping("/save")
+    @ApiOperation(value = "New Flight adding operation. FlightRoute field must be provided since FlightRoute cannot be created on its own. " +
+            "Flight Tickets are created after Flight saved and the number of tickets are provided by saved Flight's passengerCapacity field")
     public Response<FlightDto> save(@RequestBody @Valid FlightDto flightDto) {
         Flight savedFlight = flightService.saveAndUpdate(flightMapper.toEntity(flightDto));
         Integer passengerCapacity = flightDto.getPassengerCapacity();
@@ -59,6 +64,7 @@ public class FlightController extends AbstractController{
     }
 
     @PostMapping("/update/{id}")
+    @ApiOperation(value = "Updating existing Flight with ID field")
     public Response<FlightDto> update(@RequestBody @Valid FlightDto flightDto, @PathVariable Long id) {
         if (flightService.existsById(id)){
             Optional<Flight> optionalFlight = flightService.findById(id);
@@ -81,6 +87,7 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/listAll")
+    @ApiOperation(value = "Listing all persisted Flights")
     public Response<List<FlightDto>> findAll(){
         List<Flight> flightList = (List<Flight>) flightService.findAll();
         if (flightList.isEmpty()){
@@ -95,6 +102,7 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/list/{id}")
+    @ApiOperation(value = "Search Flight by ID field")
     public Response<FlightDto> findById(@PathVariable Long id){
         if (flightService.existsById(id)) {
             Optional<Flight> optionalFlight = flightService.findById(id);
@@ -111,6 +119,7 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/list/byName")
+    @ApiOperation(value = "Search Flight with NAME field with DTO")
     public Response<List<FlightDto>> findByName(@RequestBody FlightSearchByNameDto flightSearchByNameDto) {
         List<Flight> flightList = flightService.findByName(flightSearchByNameDto.getName());
         if (flightList.isEmpty()) {
@@ -125,6 +134,7 @@ public class FlightController extends AbstractController{
     }
 
     @GetMapping("/list/byFlightRoute")
+    @ApiOperation(value = "Search Flight with existing FlightRoute")
     public Response<List<FlightDto>> findByFlightRoute(@RequestBody FlightRouteDto flightRoute) {
         List<Flight> flightList = flightService.findByFlightRoute(flightRouteMapper.toEntity(flightRoute));
         if (flightList.isEmpty()) {
@@ -139,11 +149,24 @@ public class FlightController extends AbstractController{
     }
 
     @DeleteMapping("/delete/{id}")
-    public Response<Void> deleteById(@PathVariable Long id){
+    @ApiOperation(value = "Delete Airport with ID field. Check if any FlightTickets are sold. If any found then Flight cannot be deleted")
+    public Response<?> deleteById(@PathVariable Long id){
         if (flightService.existsById(id)){
-            flightService.deleteById(id);
-            log.info(getMessage("flight.with.id.deleted",id));
-            return new Response<>(getMessage("flight.with.id.deleted",id),HttpStatus.OK);
+            Optional<Flight> optionalFlight = flightService.findById(id);
+            if (optionalFlight.isPresent()){
+                Flight flight = optionalFlight.get();
+                if (flight.getFlightTickets().stream().anyMatch(FlightTicket::isPurchased)){
+                    log.info(getMessage("flight.with.id.has.purchased.tickets.cannot.delete",id));
+                    return new Response<>(getMessage("flight.with.id.has.purchased.tickets.cannot.delete",id),HttpStatus.OK);
+                }else {
+                    flightService.deleteById(id);
+                    log.info(getMessage("flight.with.id.deleted",id));
+                    return new Response<>(getMessage("flight.with.id.deleted",id),HttpStatus.OK);
+                }
+            }else {
+                log.info(getMessage("flight.with.id.could.not.be.found",id));
+                return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
+            }
         } else {
             log.info(getMessage("flight.with.id.could.not.be.found",id));
             return new Response<>(getMessage("flight.with.id.could.not.be.found",id),HttpStatus.NO_CONTENT);
