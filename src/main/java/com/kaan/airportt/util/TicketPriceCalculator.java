@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public class TicketPriceCalculator {
     private static TicketPriceCalculator ticketPriceCalculator = null;
-    private static BigDecimal lastSoldTicketPrice;
+    private static volatile BigDecimal lastSoldTicketPrice;
 
     protected TicketPriceCalculator() {
     }
